@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2025 Legiayayana
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyswiftebuild"
+authors = [{name = "Legiayayana", email = "ada@chronovore.dev"}]
+license = {text = "EUPL-1.2"}
+classifiers = [
+	"License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+]
+dynamic = ["version", "description"]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+	"license_expression"
+]
+
+[project.optional-dependencies]
+pretty-log = ["rich"]
+
+[project.scripts]
+pyswiftebuild = "pyswiftebuild.__main__:entry_point"
+
+[project.urls]
+Homepage = "https://github.com/yretenai/pyswiftebuild/"
