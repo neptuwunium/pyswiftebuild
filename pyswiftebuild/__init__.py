@@ -4,4 +4,4 @@
 
 """A generator and build tool for Swift ebuilds."""
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'

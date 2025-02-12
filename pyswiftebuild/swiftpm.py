@@ -140,7 +140,7 @@ def get_dependencies(path: str) -> [BuildDependency]:
 
 	for dependency in package['pins']:
 		if dependency['kind'] != 'remoteSourceControl':
-			logging.error(f'{dependency['identity']} is not remoteSourceControl, it is {dependency['kind']} which this can't handle (yet.)')
+			logging.error(f'{dependency['identity']} is not remoteSourceControl, it is {dependency['kind']} which this can\'t handle (yet.)')
 			continue
 		name = dependency['identity']
 		state = BuildDependencyState(name, dependency['location'], dependency['state'])
