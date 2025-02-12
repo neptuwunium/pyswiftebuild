@@ -5,6 +5,7 @@
 import argparse
 import json
 import logging
+import os
 import os.path
 import sys
 from pathlib import Path
@@ -16,16 +17,18 @@ def main(prog_name: str, *argv: str) -> int:
 	argp.add_argument('--workdir',
 					  type=Path,
 					  help='Main directory of the swift package (i.e. has Package.swift).')
-	argp.add_argument('--distdir',
-					  type=Path,
-					  help='Distribution files directory, for setting up the build workspace while compiling via an ebuild.')
-	argp.add_argument('-c', '--configuration',
-					  default='debug',
-					  choices=['debug', 'release'],
-					  help='Build configuration type.')
+	argp.add_argument('--state',
+                      action="store_true",
+					  help='When enabled, will set up workspace state for building.')
 	args = argp.parse_args(argv)
 
-	# todo: determine what to do, then do it.
+	if args.workdir is None:
+		args.workdir = os.getcwd()
+
+	if args.state:
+		swift_prepare.construct_build_env(args.workdir)
+	else:
+		swift_ebuild.build_src_template(args.workdir)
 
 def entry_point() -> None:
 	try:

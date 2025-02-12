@@ -28,3 +28,6 @@ pyswiftebuild = "pyswiftebuild.__main__:entry_point"
 
 [project.urls]
 Homepage = "https://github.com/yretenai/pyswiftebuild/"
+
+[tool.hatch.version]
+path = "pyswiftebuild/__init__.py"
