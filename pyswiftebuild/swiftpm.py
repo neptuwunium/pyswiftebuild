@@ -102,9 +102,9 @@ def get_package_resolved(path: str) -> JSONData:
 		text = call.stdout.decode('utf8').strip()
 		if call.returncode != 0:
 			raise RuntimeError(f'could not successfully call swift package resolve: {call.stderr.decode('utf8').strip()}')
-		logging.warning(f'called swift package resolve, ensure that the build directory has Package.resolved when compiling')
+		logging.warning(f'# called swift package resolve, ensure that the build directory has Package.resolved when compiling')
 	if not os.path.exists(resolved_path):
-		logging.warning(f'could not locate {resolved_path}, assuming it\'s empty')
+		logging.warning(f'# could not locate {resolved_path}, assuming it\'s empty')
 		return {}
 	with open(resolved_path, 'r') as resolved:
 		return json.load(resolved)
@@ -124,7 +124,7 @@ def get_artifacts(path: str) -> [BuildArtifact]:
 		if 'library' in product['type']:
 			library_type = product['type']['library']
 			if library_type == 'automatic' or library_type is None:
-				logging.warning(f'library product {product['name']} does not produce build artifacts as it is an automatic library. set libraryType to either .static or .dynamic.')
+				logging.warning(f'# library product {product['name']} does not produce build artifacts as it is an automatic library. set libraryType to either .static or .dynamic.')
 				continue
 			elif library_type == 'dynamic':
 				artifacts.add(BuildArtifact(f'lib{product['name']}.so', ArtifactType.shared))
@@ -140,7 +140,7 @@ def get_dependencies(path: str) -> [BuildDependency]:
 
 	for dependency in package['pins']:
 		if dependency['kind'] != 'remoteSourceControl':
-			logging.error(f'{dependency['identity']} is not remoteSourceControl, it is {dependency['kind']} which this can\'t handle (yet.)')
+			logging.error(f'# {dependency['identity']} is not remoteSourceControl, it is {dependency['kind']} which this can\'t handle (yet.)')
 			continue
 		name = dependency['identity']
 		state = BuildDependencyState(name, dependency['location'], dependency['state'])

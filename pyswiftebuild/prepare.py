@@ -4,6 +4,7 @@
 
 import os
 import os.path
+import json
 from pyswiftebuild import swiftpm
 
 def construct_build_env(workdir: str):
