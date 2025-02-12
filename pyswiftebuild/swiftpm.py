@@ -26,7 +26,7 @@ class BuildArtifact():
 	def __init__(self, name: str, artifact_type: ArtifactType):
 		self.name = name
 		self.artifact_type = artifact_type
-		self.ebuild = f'( {artifact_type.value} "{name}" )'
+		self.ebuild = f'"{artifact_type.value} {name}"'
 
 
 	def __hash__(self): return self.name.__hash__()
@@ -54,7 +54,7 @@ class BuildDependencyState():
 		self.version = state['version'] if 'version' in state else None
 		self.branch = state['branch'] if 'branch' in state else None
 		self.tarball = f'{self.url}/archive/{self.revision}.tar.gz'
-		self.ebuild = f'( "{name}" "{self.url}" "{self.revision}" )'
+		self.ebuild = f'"{name} {self.url} {self.revision}"'
 
 
 	def __hash__(self): return self.tarball.__hash__()
