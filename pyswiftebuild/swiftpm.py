@@ -69,12 +69,14 @@ class BuildDependency():
 	name: str
 	state: BuildDependencyState
 	data: JSONData
+	version: int
 
 
-	def __init__(self, name: str, state: BuildDependencyState, data: JSONData):
+	def __init__(self, name: str, state: BuildDependencyState, data: JSONData, version: int):
 		self.name = name
 		self.state = state
 		self.data = data
+		self.version = version
 
 	def __hash__(self): return f'{self.name}-{self.state.tarball}'.__hash__()
 
@@ -114,22 +116,22 @@ def get_artifacts(path: str) -> [BuildArtifact]:
 	package = get_package_json(path)
 	artifacts: Set[BuildArtifact] = set()
 
-	for target in package['targets']:
-		if target['type'] != 'executable': continue
-		artifacts.add(BuildArtifact(target['name'], ArtifactType.executable))
-
 	for product in package['products']:
 		if 'executable' in product['type']:
 			artifacts.add(BuildArtifact(product['name'], ArtifactType.executable))
 		if 'library' in product['type']:
-			library_type = product['type']['library']
-			if library_type == 'automatic' or library_type is None:
-				logging.warning(f'# library product {product['name']} does not produce build artifacts as it is an automatic library. set libraryType to either .static or .dynamic.')
-				continue
-			elif library_type == 'dynamic':
-				artifacts.add(BuildArtifact(f'lib{product['name']}.so', ArtifactType.shared))
-			else:
-				artifacts.add(BuildArtifact(f'lib{product['name']}.a', ArtifactType.static))
+			library_types = product['type']['library']
+			if not isinstance(library_types, list):
+				library_types = [library_types]
+
+			for library_type in library_types:
+				if library_type == 'automatic' or library_type is None:
+					logging.warning(f'# library product {product['name']} does not produce build artifacts as it is an automatic library. set libraryType to either .static or .dynamic.')
+					continue
+				elif library_type == 'dynamic':
+					artifacts.add(BuildArtifact(f'lib{product['name']}.so', ArtifactType.shared))
+				else:
+					artifacts.add(BuildArtifact(f'lib{product['name']}.a', ArtifactType.static))
 
 	return artifacts
 
@@ -137,13 +139,20 @@ def get_artifacts(path: str) -> [BuildArtifact]:
 def get_dependencies(path: str) -> [BuildDependency]:
 	package = get_package_resolved(path)
 	dependencies: Set[BuildDependency] = set()
+	version = package['version']
 
-	for dependency in package['pins']:
-		if dependency['kind'] != 'remoteSourceControl':
-			logging.error(f'# {dependency['identity']} is not remoteSourceControl, it is {dependency['kind']} which this can\'t handle (yet.)')
-			continue
-		name = dependency['identity']
-		state = BuildDependencyState(name, dependency['location'], dependency['state'])
-		dependencies.add(BuildDependency(name, state, dependency))
+	pins = package['pins'] if version >= 2 else package['object']['pins']
+
+	for dependency in pins:
+		if version >= 2:
+			if dependency['kind'] != 'remoteSourceControl':
+				logging.error(f'# {dependency['identity']} is not remoteSourceControl, it is {dependency['kind']} which this can\'t handle (yet.)')
+				continue
+			name = dependency['identity']
+			state = BuildDependencyState(name, dependency['location'], dependency['state'])
+		else:
+			name = dependency['package']
+			state = BuildDependencyState(name, dependency['repositoryURL'], dependency['state'])
+		dependencies.add(BuildDependency(name, state, dependency, version))
 
 	return dependencies
